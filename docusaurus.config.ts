@@ -52,7 +52,7 @@ const config: Config = {
       title: 'Dokumentation MDE Berlin',
       logo: {
         alt: 'Dokumentation MDE Berlin Logo',
-        src: 'img/logo.svg',
+        src: 'img/gdi_logo.png',
       },
       items: [
         {
