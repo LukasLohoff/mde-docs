@@ -1,0 +1,65 @@
+---
+sidebar_position: 8
+hide_table_of_contents: false
+---
+
+# Sicherung und Wiederherstellung (Backup & Restore)
+
+### Sicherungsumfang
+
+Sicherungsobjekte:
+
+- PostgreSQL-Datenbanken `mde` und `keycloak` (zusätzlich `gnos` in Testsetups
+  mit interner GNOS-Datenhaltung)
+- `mde-backend/lucene`
+- `mde-backend/variables.json`
+- `mde-backend/keystore/cacerts`
+- `.env`, `.client-env`
+- NGINX-Zertifikat, Schlüssel und Konfigurationsdateien
+- `codelists/`
+
+### Backup-Ablauf
+
+1. Es liegt ein definierter Sicherungszeitpunkt vor (vorzugsweise in einem
+   wartungsarmen Zeitfenster).
+2. Für PostgreSQL erfolgt ein konsistenter Dump je Datenbank.
+3. Konfigurations- und Laufzeitverzeichnisse werden versioniert oder
+   dateibasiert gesichert.
+4. Das Backup wird mit Zeitstempel abgelegt und auf Lesbarkeit geprüft.
+
+Beispiel (Testumgebung mit lokalem PostgreSQL-Container):
+
+```bash
+podman exec -i mde-postgres sh -lc \
+  'pg_dump -U "$POSTGRES_USER" -d mde' > backup_mde.sql
+podman exec -i mde-postgres sh -lc \
+  'pg_dump -U "$POSTGRES_USER" -d keycloak' > backup_keycloak.sql
+tar -czf backup_files_$(date +%F).tar.gz \
+  backup_mde.sql backup_keycloak.sql \
+  mde-backend/lucene mde-backend/variables.json mde-backend/keystore \
+  codelists .env .client-env mde-nginx
+```
+
+### Restore-Ablauf
+
+1. Zielsystem und Zielversion werden festgelegt.
+2. Betroffene Container sind gestoppt.
+3. Datenbank-Backups werden in die Ziel-Datenbanken eingespielt.
+   Die Datenbanken müssen vor dem Restore bereits vorhanden sein;
+   der Restore legt keine Datenbanken automatisch an.
+4. Dateibasierte Sicherungen werden in die Ursprungsverzeichnisse zurückgeführt.
+5. Containerstart erfolgt mit anschließender Funktionsprüfung gemäß Abschnitt
+   5.3.
+
+Beispiel (Testumgebung):
+
+```bash
+podman compose -f docker-compose-test.yml down
+tar -xzf backup_files_YYYY-MM-DD.tar.gz
+podman compose -f docker-compose-test.yml up -d mde-postgres
+podman exec -i mde-postgres sh -lc \
+  'psql -U "$POSTGRES_USER" -d mde' < backup_mde.sql
+podman exec -i mde-postgres sh -lc \
+  'psql -U "$POSTGRES_USER" -d keycloak' < backup_keycloak.sql
+podman compose -f docker-compose-test.yml up -d
+```

@@ -1,0 +1,32 @@
+---
+sidebar_position: 13
+hide_table_of_contents: false
+---
+
+# Build- und Releaseprozess (CI/CD)
+
+Für `mde-backend` und `mde-client` gelten:
+
+- Semantic Versioning für Versionsstände
+- Semantic Commit Convention für automatisierte Release-Auswertung
+- manuell ausgelöste GitHub-Release-Workflows
+  - `mde-backend`:
+    [Workflow](https://github.com/gdi-be/mde-backend/actions)
+  - `mde-client`:
+    [Workflow](https://github.com/gdi-be/mde-client/actions)
+
+Der Releaseprozess beinhaltet automatisiert:
+
+- Analyse der Commits zur Versionsbestimmung
+- Generierung von Release Notes und Changelog-Aktualisierung
+- Veröffentlichung von Releases
+  - `mde-backend`:
+    [Releases](https://github.com/gdi-be/mde-backend/releases)
+  - `mde-client`:
+    [Releases](https://github.com/gdi-be/mde-client/releases)
+- Erstellung und Veröffentlichung versionierter Container-Images in der
+  GitHub Container Registry (GHCR)
+  - `mde-client`:
+    [GHCR](https://github.com/gdi-be/mde-client/pkgs/container/mde-client)
+  - `mde-backend`:
+    [GHCR](https://github.com/gdi-be/mde-client/pkgs/container/mde-backend)

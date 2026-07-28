@@ -1,0 +1,645 @@
+---
+sidebar_position: 0
+---
+
+# Betriebsanleitung MDE (Metadateneditor)
+
+- [Zweck und Geltungsbereich](./zweck-und-geltungsbereich.mdx)
+- [Zielgruppe](./zielgruppe.mdx)
+- [Systembeschreibung](./systembeschreibung.mdx)
+  - [Gesamtsystem](./systembeschreibung.mdx#gesamtsystem)
+  - [Interne Komponenten](./systembeschreibung.mdx#interne-komponenten)
+  - [Externe Komponenten](./systembeschreibung.mdx#externe-komponenten)
+  - [Datenhaltung und Datenfluss](./systembeschreibung.mdx#datenhaltung-und-datenfluss)
+  - [Datenmodell](./systembeschreibung.mdx#datenmodell)
+- [Systemvoraussetzungen](./systemvoraussetzungen.mdx)
+- [Installation und Inbetriebnahme](./installation-und-inbetriebnahme.mdx)
+  - [Installationsablauf](./installation-und-inbetriebnahme.mdx#installationsablauf)
+  - [Keycloak-Basiskonfiguration](./installation-und-inbetriebnahme.mdx#keycloak-basiskonfiguration)
+  - [Installationsprüfung](./installation-und-inbetriebnahme.mdx#installationsprüfung)
+- [Betrieb und Pflege](./betrieb-und-pflege.mdx)
+- [Konfiguration per Codelisten](./konfiguration-per-codelisten.mdx)
+- [Sicherung und Wiederherstellung (Backup & Restore)](./sicherung-und-wiederherstellung.mdx)
+- [Monitoring und Logging](./monitoring-und-logging.mdx)
+- [Sicherheitskonzept](./sicherheitskonzept.mdx)
+- [Betriebliche Rollen und Verantwortlichkeiten](./betriebliche-rollen-und-verantwortlichkeiten.mdx)
+- [Deinstallation](./deinstallation.mdx)
+- [Build- und Releaseprozess (CI/CD)](./build-und-releaseprozess-cicd.mdx)
+
+{/* ## Zweck und Geltungsbereich
+
+Dieses Dokument beschreibt Installation, Betrieb, Pflege, Sicherung,
+Wiederherstellung und Deinstallation des Metadateneditors (MDE) auf Basis der
+beteiligten Komponenten.
+
+Der Geltungsbereich umfasst:
+
+- die Testumgebung auf Basis von `docker-compose-test.yml` (inklusive
+  bereitgestelltem GeoNetwork opensource (GNOS) als Container
+  `mde-gnos` und Elasticsearch als Container `mde-elasticsearch`)
+- die Produktivumgebung auf Basis von `docker-compose-prod.yml` (mit extern
+  bereitgestellter GNOS-Instanz und externer PostgreSQL-Instanz) */}
+
+{/* ## Zielgruppe
+
+Die Zielgruppe besteht aus technischem Betriebspersonal mit Kenntnissen in:
+
+- Serveradministration (Linux)
+- Podman und Compose-Betrieb
+- Keycloak-Administration
+- Continuous Integration/Continuous Delivery (CI/CD) und
+  Versionsmanagement */}
+
+{/* ## Systembeschreibung
+
+### Gesamtsystem
+
+Das System arbeitet als integrierte Plattform, bei der **NGINX** als zentrales
+Gateway dient, **Keycloak** die Authentifizierung übernimmt, das **Backend** die
+Geschäftslogik ausführt und der **Client** als Benutzeroberfläche fungiert und somit das WEB-Formular zur Verfügung stellt.
+Die Kommunikation zwischen den Diensten erfolgt intern über ein Docker-Netzwerk,
+während externe Zugriffe ausschließlich über den NGINX-Reverse-Proxy möglich
+sind.
+Durch diese Architektur wird eine klare Trennung von Zuständigkeiten, hohe
+Modularität und Sicherheit erreicht.
+
+Diese Skizze veranschaulicht die Architektur des Systems:
+
+![A](./img/architektur.png?raw=true)
+
+Die entwickelte Anwendung ist ein modular aufgebautes System zur Verwaltung von
+Daten und Diensten. Sie basiert auf einer Container-Infrastruktur, die über
+_podman_ orchestriert wird. Alle Komponenten sind containerbasiert umgesetzt.
+Die Architektur umfasst vier zentrale Komponenten:
+
+### Interne Komponenten
+
+#### Reverse Proxy und SSL-Terminierung – `mde-nginx`
+
+Der Dienst **mde-nginx** dient als zentraler Einstiegspunkt für alle externen
+Anfragen an das System.
+
+- **Aufgaben**:
+  - Routing von HTTP- und HTTPS-Anfragen an die internen Dienste.
+  - SSL-Terminierung mithilfe eines selbstsignierten Zertifikats.
+  - Weiterleitung von Requests an Backend, Client, Keycloak und GNOS (extern).
+- **Sicherheit**:
+  - HTTPS-Absicherung über selbstsigniertes Zertifikat.
+  - Healthcheck zur Überwachung der Erreichbarkeit.
+- **Kommunikation**:
+  - Externe Ports 80 (HTTP) und 443 (HTTPS) werden bereitgestellt.
+  - Abhängigkeit zu den Backend-, Authentifizierungs- und Client-Diensten.
+
+#### Benutzerauthentifizierung und -verwaltung – `mde-keycloak`
+
+Der Dienst **mde-keycloak** stellt ein Identity- und Access-Management-System
+auf Basis von _Keycloak_ bereit. Keycloak selbst ist an ein externes LDAP-System
+angebunden und dient zur Steuerung der Authorisierung und Verwaltung von
+Benutzern.
+
+- **Aufgaben**:
+  - Zentrale Benutzer- und Rollenverwaltung.
+  - Authentifizierung von Nutzern und Absicherung der Schnittstellen.
+  - Verwaltung von Realms, Clients und Zugriffsrichtlinien.
+- **Konfiguration und Datenhaltung**:
+  - Nutzung einer PostgreSQL-Datenbank für die Persistenz.
+  - Konfiguration für Reverse Proxy-Betrieb mit definiertem Kontextpfad `/auth`.
+
+#### Geschäftslogik und Datenverarbeitung – `mde-backend`
+
+Der Dienst **mde-backend** stellt die eigentliche Business-Logik der Anwendung
+bereit.
+
+- **Aufgaben**:
+  - Verarbeitung von Anfragen der Clients.
+  - Zugriff auf externe Dienste (z. B. CSW-Server) zur Datenabfrage.
+  - Verwaltung von Code-Listen und variablenbasierten Konfigurationen.
+  - Integration der Authentifizierung über Keycloak.
+- **Datenhaltung**:
+  - Nutzung einer PostgreSQL-Datenbank.
+  - Speicherung von Indexdaten im Lucene-Format.
+- **Konfiguration**:
+  - Anpassbar über eine `variables.json`-Datei, die verschiedenen `Codelisten` (siehe auch [hier](#konfiguration-per-codelisten)) und Log4j2-Konfiguration.
+  - Zugriff auf Zertifikate für gesicherte Verbindungen.
+- **Framework**:
+  - Spring Boot
+
+#### Webbasierte Benutzeroberfläche – `mde-client`
+
+Der Dienst **mde-client** stellt die grafische Benutzeroberfläche (GUI) der
+Anwendung bereit.
+
+- **Aufgaben**:
+  - Darstellung der Inhalte und Funktionen des Backends im Browser.
+  - Kommunikation mit dem Backend über definierte APIs.
+  - Einbindung der Code-Listen und Konfigurationsvariablen.
+- **Konfiguration**:
+  - erfolgt über `.env`-Datei und angebundene Volumes.
+- **Framework**:
+  - SvelteKit
+
+### Externe Komponenten
+
+#### Datenbank - PostgreSQL
+
+Das System verwendet zur Datenhaltung eine PostgreSQL-Datenbank, die extern
+bereitgestellt wird. Der Hostname, Nutzer und das Passwort werden in der
+`.env`-Datei konfiguriert.
+
+#### Metadatenverwaltung - GeoNetwork
+
+Zudem benötigt das System zur Veröffentlichung der Metadaten ein
+GeoNetwork opensource, das ebenfalls extern bereitgestellt wird. Die
+Zugangsdaten werden ebenfalls in der `.env`-Datei konfiguriert.
+
+### Datenhaltung und Datenfluss
+
+Es gibt grundsätzlich drei wesentliche Knotenpunkte, wo Daten persistiert
+werden. Dies ist maßgeblich die PostgreSQL-Datenbank als führendes System. Dort
+werden die erfassten oder importierten Metadaten in einer Tabelle als
+JSONB-Felder gespeichert.
+
+Um die Suche zu beschleunigen, wird zusätzlich ein Lucene-Suchindex aufgebaut.
+Dieser wird zwar persistent abgespeichert, ist aber temporär. Sobald die
+Anwendung (Backend) neu gestartet wird, wird der Suchindex neu generiert.
+
+Der dritte Knotenpunkt ist das GeoNetwork opensource, welches die generierten ISO-Metadaten
+persistiert.
+
+### Datenmodell
+
+Das Datenbank-Modell selbst ist hier abgebildet:
+
+![DB](./img/db.png?raw=true)
+
+Es gibt in der Datenbank nur drei Tabellen.
+
+In `flyway_schema_history` wird gespeichert, welche Datenbank-Migrationen in der entsprechenden Instanz bereits
+ausgeführt wurden.
+
+In `service_deletion` wird gespeichert, welche Dienste aus Metadatensätzen bei der Editierung im Metadateneditor gelöscht wurden, um sie im Fall der Neu-Veröffentlichung auch im CSW bzw. im Geonetwork zu löschen.
+
+Zentral ist die Tabelle `metadata_collection`.
+
+- Die Spalte `id` beinhaltet die autogenerierte ID, den Primary Key, für die einzelnen Metadatensätze.
+- Die Spalte `metadata_id` beinhaltet die UUID des Metadatensatzes
+- Die Spalte `team_member_ids` beinhaltet alle Nutzer-IDs, die an der Bearbeitung des Metadatensatzes beteiligt sind
+- Die Spalte `responsible_role` beinhaltet die Rolle, der der Metadatensatz aktuell zugewiesen ist
+  - MdeAdministrator --> Administrator
+  - MdeQualityAssurance --> Qualitätsmanagement
+  - MdeDataOwner --> Datenhaltende Stelle
+  - MdeEditor --> Redakteur
+- Die Spalte `client_metadata` beinhaltet als JSONB die Metadaten, die für eine Client-Anwendung relevant sind und dort für die Anzeige genutzt werden könnten
+- Die Spalte `iso_metadata` beinhaltet als JSONB die Metadaten, die für die Erzeugung der ISO-Metadaten relevant sind
+- Die Spalte `technical_metadata` beinhaltet als JSONB die Metadaten, die technischer Natur sind, wie z.B. das CRS, in dem die Daten abgegeben wurden
+- Die Spalte `assigned_user_id` beinhaltet die Nutzer-ID des Nutzers, dem dieser Metadatensatz aktuell zugewiesen ist
+- Die Spalte `created` beinhaltet das Erstellungsdatum des Metadatensatzes
+- Die Spalte `modified` beinhaltet das Datum der letzten Änderung des Metadatensatzes
+- Die Spalte `owner_id` beinhaltet die Nutzer-ID des Nutzers, der den Metadatensatz angelegt hat
+- Die Spalte `approved` beinhaltet als true/false boolean, ob der Metadatensatz qs-geprüft ist
+- Die Spalte `status` beinhaltet den Status des Metadatensatzes.
+  - new: Der Datensatz ist neu angelegt
+  - in edit: Der Datensatz wurde modifiziert
+  - published: Der Datensatz wurde im CSW veröffentlicht
+- Die Spalte `cloned_from_id` beinhaltet die ID des Vorlage-Datensatzes, sofern bei der Erstellung eine Vorlage genutzt wurde
+
+Die Metadaten selbst sind als JSONB-Objekte gespeichert. Diese sind aufgeteilt in technische, Client,
+und ISO-Metadaten. Diese sind jeweils mittels Java-Klassen modelliert. Die
+Modellierung findet sich im folgenden Diagramm:
+
+![M](./img/relations.svg?raw=true)
+
+Metadaten-Feldübersicht und deren Zuordnung im JSON-Schema
+
+| profileId | key                                      | Feldname / Anzeige-Titel       |
+|-----------|------------------------------------------|------------------|
+| 1         | isoMetadata.title                        | Titel            |
+| 2         | isoMetadata.description                  | Kurzbeschreibung |
+| 4         | isoMetadata.privacy                      | Datenschutz-Einstellungen      |
+| 5         | isoMetadata.metadataProfile              | Metadaten-Typ      |
+| 6         | isoMetadata.highValueDataset             | High Value Datensatz              |
+| 7         | isoMetadata.inspireTheme                 | INSPIRE Annex Thema            |
+| 8         | isoMetadata.highValueDataCategory        | HVD-Kategorien    |
+| 9         | isoMetadata.created                      | Erstellung       |
+| 10        | isoMetadata.published                    | Veröffentlichung |
+| 11        | isoMetadata.modified                     | Aktualisierung   |
+| 12        | isoMetadata.validFrom                    | gültig ab        |
+| 24        | isoMetadata.validTo                      | gültig bis                 |
+| 13        | isoMetadata.topicCategory                | Themenkategorie        |
+| 14        | isoMetadata.maintenanceFrequency         | Pflegeintervall          |
+| 15        | isoMetadata.keywords                     | Schlagwörter     |
+| 16        | technicalMetadata.deliveredCrs           | geliefertes Koordinatensystem                 |
+| 17        | isoMetadata.crs                          | abzugebendes Koordinatensystem                 |
+| 71        | isoMetadata.extent.minx                  | Minimaler X-Wert                 |
+| 72        | isoMetadata.extent.maxx                  | Maximaler X-Wert                 |
+| 73        | isoMetadata.extent.miny                  | Minimaler Y-Wert                 |
+| 74        | isoMetadata.extent.maxy                  | Maximaler Y-Wert                 |
+| 19        | isoMetadata.pointsOfContact              | Kontaktangaben   |
+| 20        | isoMetadata.pointsOfContact.name         | Name          |
+| 21        | isoMetadata.pointsOfContact.organisation | Organisation  |
+| 22        | isoMetadata.pointsOfContact.phone        | Telefonnummer |
+| 23        | isoMetadata.pointsOfContact.email        | E-Mailadresse |
+| 25        | isoMetadata.termsOfUseId                 | Nutzungsbestimmungen               |
+| 26        | isoMetadata.termsOfUseSource             | Quelle-NB        |
+| 27        | isoMetadata.scale                        | Vergleichsmaßstab                 |
+| 28        | isoMetadata.resolutions                  | Bodenauflösung                 |
+| 29        | isoMetadata.preview                      | Vorschau         |
+| 30        | isoMetadata.contentDescription           | Inhaltliche Beschreibung                 |
+| 31        | isoMetadata.technicalDescription         | Technische Beschreibung                 |
+| 32        | isoMetadata.lineage                      | Herkunft der Daten                 |
+| 33        | isoMetadata.lineage.title                | Titel                 |
+| 34        | isoMetadata.lineage.date                 | Datum der Veröffentlichung                |
+| 35        | isoMetadata.lineage.identifier           | Identifier                 |
+| 37        | isoMetadata.valid                        | Überprüfung      |
+| 38        | isoMetadata.inspireAnnexVersion          | Schema-Version   |
+| 39        | isoMetadata.spatialRepresentationTypes   | Räumliche Darstellungsart                 |
+| 40        | isoMetadata.services                     |                  |
+| 41        | isoMetadata.contentDescriptions          | Weitere Informationen                 |
+| 42        | isoMetadata.contentDescriptions.description |   Titel               |
+| 43        | isoMetadata.contentDescriptions.code     |    Code              |
+| 44        | isoMetadata.contentDescriptions.url      |   URL               |
+| 45        | isoMetadata.services.workspace           |    Dienst-ID / Arbeitsbereich des Dienstes              |
+| 46        | isoMetadata.services.preview             |     Vorschau des Dienstes             |
+| 47        | isoMetadata.services.legendImage         |    Gesamtlegende              |
+| 75        | isoMetadata.services.legendImage.url     |    URL              |
+| 76        | isoMetadata.services.legendImage.format  |   Format               |
+| 77        | isoMetadata.services.legendImage.width   |   Breite               |
+| 78        | isoMetadata.services.legendImage.height  |   Höhe              |
+| 48        | clientMetadata.layers                    |                  |
+| 49        | clientMetadata.layers.title              |   Titel der Kartenebene               |
+| 50        | clientMetadata.layers.name               |   Name der Kartenebene               |
+| 51        | clientMetadata.layers.styleName          |    Name des Style              |
+| 52        | clientMetadata.layers.styleTitle         |    Titel des Styles              |
+| 53        | clientMetadata.layers.legendImage        |    Legende              |
+| 54        | clientMetadata.layers.shortDescription   |   Kurzbeschreibung               |
+| 55        | clientMetadata.layers.datasource         |    Ablageort der Daten              |
+| 68        | clientMetadata.layers.secondaryDatasource|   sekundäre Datenhaltung               |
+| 58        | isoMetadata.services.serviceType         |    Dienst-Typ              |
+| 59        | isoMetadata.services.title               |     Titel des Dienstes             |
+| 60        | isoMetadata.services.shortDescription    |    Kurzbeschreibung des Dienste              |
+| 56        | isoMetadata.services.featureTypes        |                  |
+| 61        | isoMetadata.services.featureTypes.title  |    Titel des FeatureTypes              |
+| 62        | isoMetadata.services.featureTypes.name   |     Name des FeatureTypes             |
+| 69        | isoMetadata.services.featureTypes.shortDescription   |     Kurzbeschreibung des FeatureTypes             |
+| 63        | isoMetadata.services.featureTypes.columns   |                  |
+| 64       | isoMetadata.services.featureTypes.columns.name   |     Attribut-Name             |
+| 65        | isoMetadata.services.featureTypes.columns.alias   |     Attribut-Alias             |
+| 66        | isoMetadata.services.featureTypes.columns.type   |     Attribut-Datentyp             | */}
+
+
+{/* ## Systemvoraussetzungen
+
+### Infrastruktur und Betriebssystem
+
+- Linux-Server mit aktuellem Sicherheitsstand
+- x86_64-kompatible Laufzeitumgebung für die verwendeten Container-Images
+- Root- oder gleichwertige Administrationsrechte für Netz- und
+  Dateisystemkonfiguration
+- persistenter Speicher für Daten- und Konfigurationsverzeichnisse
+- funktionierende DNS-Auflösung für interne und externe Zielsysteme
+- gültige Systemzeit (NTP-Synchronisation)
+
+### Software und Werkzeuge
+
+- `git`
+- `podman`
+- `podman compose`
+- `curl` (Betriebsprüfung und Healthchecks)
+- `keytool` (bei Zertifikatsimport in Java-Keystores)
+- PostgreSQL-Werkzeuge (`pg_dump`, `pg_restore` bzw. `psql`) für Backup/Restore
+
+### Netzwerk und Ports
+
+- Eingehend: TCP 80/443 für NGINX
+- Intern im Compose-Verbund: 3000 (Client), 8080 (Backend/Keycloak/GNOS), 5432
+  (PostgreSQL), 9200 (Elasticsearch, Test)
+- In der Produktivumgebung: Erreichbarkeit der externen PostgreSQL- und
+  GNOS-Endpunkte
+
+### Dateien und Verzeichnisse
+
+Vor dem Start liegen folgende Dateien vollständig vor:
+
+- `.env` (abgeleitet aus `.env.example`)
+- `.client-env` (abgeleitet aus `.client-env.example`)
+- `mde-backend/variables.json` (abgeleitet aus `variables-example.json`)
+- NGINX-Zertifikat und privater Schlüssel gemäß ausgewählter Compose-Datei
+
+Persistente Verzeichnisse sind vorhanden und beschreibbar:
+
+- `mde-backend/lucene`
+- `mde-backend/keystore`
+- `mde-postgres/postgresql_data` (Test)
+- optionale GNOS-/Elasticsearch-Datenverzeichnisse (Test)
+- `codelists` */}
+
+{/* ## Installation und Inbetriebnahme
+
+### Installationsablauf
+
+1. Das Repository `mde-deployment` liegt auf dem Zielserver im gewünschten Stand
+   vor.
+2. Die Umgebungsdateien werden aus den Beispielvorlagen abgeleitet und mit
+   standortspezifischen Werten gepflegt.
+3. Für privilegierte Ports wird auf Hostebene die Konfiguration
+   `net.ipv4.ip_unprivileged_port_start=80` gesetzt.
+4. Die Inbetriebnahme erfolgt mit der passenden Compose-Datei:
+   - Test: `docker-compose-test.yml`
+   - Produktion: `docker-compose-prod.yml`
+5. Nach dem ersten Start erfolgt ein zweiter Startzyklus, falls
+   Initialisierungsabhängigkeiten beim Erstlauf zu verzögerter
+   Containerbereitschaft führen.
+
+Beispielkommandos:
+
+```bash
+cp .env.example .env
+cp .client-env.example .client-env
+cp mde-backend/variables-example.json mde-backend/variables.json
+
+podman compose -f docker-compose-test.yml up -d
+# optionaler zweiter Startzyklus
+podman compose -f docker-compose-test.yml down
+podman compose -f docker-compose-test.yml up -d
+```
+
+Weiterführende Installationshinweise sind in der Projekt-README dokumentiert:
+
+- [README](https://github.com/gdi-be/mde-deployment/blob/main/README.md)
+
+### Keycloak-Basiskonfiguration
+
+Die Betriebsfähigkeit setzt folgende Keycloak-Konfiguration voraus:
+
+- Realm: `metadata-editor`
+- Realm-Rollen:
+  - `MdeAdministrator`
+  - `MdeDataOwner`
+  - `MdeEditor`
+  - `MdeQualityAssurance`
+- Client: `mde`
+- Redirect-URI passend zur Zieldomäne (z. B. `https://metadata.de/*`)
+- aktivierte Optionen für Client Authentication, Direct Access Grants und
+  Service Account Roles
+- falls unter Service Account Roles die Rollen `realm-management` bzw.
+  `realm-admin` fehlt, erfolgt deren zusätzliche Zuweisung
+- Übernahme des Client-Secret in `.env` und `.client-env`
+
+Für AD-Föderation gelten die in `mde-deployment/README.md` beschriebenen
+LDAP-/LDAPS-Parameter.
+
+### Installationsprüfung
+
+Die Installation gilt als abgeschlossen, wenn:
+
+- alle erwarteten Container im Status `running` sind
+- `https://<HOST>/` den Client ausliefert
+- `https://${KEYCLOAK_HOST}/api/actuator/health` per `curl` mit gültigem
+  Bearer-Token erreichbar ist
+- `https://<HOST>/auth/` erreichbar ist
+- Anmelde- und Rollenprüfung im Client erfolgreich ist */}
+
+{/* ## Betrieb und Pflege
+
+### Regelbetrieb
+
+- Start, Stopp und Neustart erfolgen über die eingesetzte Compose-Datei.
+- Konfigurationsänderungen an `.env`, `.client-env`, `variables.json`,
+  `log4j2.properties` oder NGINX-Konfiguration werden durch Containerneustart
+  wirksam.
+- Pflege der Codelisten erfolgt in `codelists/`; Änderungen sind unmittelbar
+  Bestandteil des laufenden Systems nach Neustart der betroffenen Container (siehe auch [hier](#konfiguration-per-codelisten))
+
+### Updates
+
+Updates erfolgen durch `git pull` mit anschließendem Neustart der betroffenen
+Container.
+
+Der Updateablauf besteht aus:
+
+1. Aktualisierung des Repository-Standes (`git pull`).
+2. Plausibilitätsprüfung geänderter Konfigurationsdateien.
+3. Neustart der betroffenen Container.
+4. Wiederholung der Installationsprüfung gemäß Abschnitt 5.3.
+
+### Fehlerbehebung
+
+Typische Betriebsstörungen und zugehörige Maßnahmen:
+
+- Bei Berechtigungsproblemen mit gemounteten Volumes erfolgt die Prüfung von
+  Besitz- und Zugriffsrechten auf Hostebene. Ergänzend kann die Volume-Option
+  `,U` (Komma-U) verwendet werden, um UID/GID-Anpassungen durchzuführen.
+- Bei Einsatz selbstsignierter Zertifikate erfolgt der Import des Zertifikats in
+  den `cacerts`-Keystore des jeweils betroffenen Containers. Beispiel:
+
+```bash
+keytool -import -file /tmp/localhost.crt -alias DEV \
+  -keystore /usr/lib/jvm/temurin-21-jdk-amd64/lib/security/cacerts \
+  -noprompt -storepass changeit
+```
+
+- Fehlt ein gültiges Zertifikat für die Systemdomäne, erfolgt der Import im
+  Container `mde-backend`.
+- Fehlt ein gültiges Zertifikat für Active Directory, erfolgt der Import im
+  Container `mde-keycloak`.
+- Fehlt ein gültiges Zertifikat für GNOS, erfolgt der Import im Container
+  `mde-backend`. */}
+
+{/* ## Konfiguration per Codelisten
+
+Der Metadateneditor nutzt Codelisten im YAML-Format zur fachlichen Konfiguration. Über Codelisten ist es möglich, anwendungsspezifische Einstellungen vorzunehmen, ohne Änderungen am Quellcode durchführen zu müssen.
+
+Die Codelisten liegen im Repository `mde-deployment`: https://github.com/gdi-be/mde-deployment/tree/main/codelists
+Die Konfigurationshinweise sind den dort hinterliegten entsprechenden README.md-Dateien zu entnehmen. */}
+
+
+{/* ## Sicherung und Wiederherstellung (Backup & Restore)
+
+### Sicherungsumfang
+
+Sicherungsobjekte:
+
+- PostgreSQL-Datenbanken `mde` und `keycloak` (zusätzlich `gnos` in Testsetups
+  mit interner GNOS-Datenhaltung)
+- `mde-backend/lucene`
+- `mde-backend/variables.json`
+- `mde-backend/keystore/cacerts`
+- `.env`, `.client-env`
+- NGINX-Zertifikat, Schlüssel und Konfigurationsdateien
+- `codelists/`
+
+### Backup-Ablauf
+
+1. Es liegt ein definierter Sicherungszeitpunkt vor (vorzugsweise in einem
+   wartungsarmen Zeitfenster).
+2. Für PostgreSQL erfolgt ein konsistenter Dump je Datenbank.
+3. Konfigurations- und Laufzeitverzeichnisse werden versioniert oder
+   dateibasiert gesichert.
+4. Das Backup wird mit Zeitstempel abgelegt und auf Lesbarkeit geprüft.
+
+Beispiel (Testumgebung mit lokalem PostgreSQL-Container):
+
+```bash
+podman exec -i mde-postgres sh -lc \
+  'pg_dump -U "$POSTGRES_USER" -d mde' > backup_mde.sql
+podman exec -i mde-postgres sh -lc \
+  'pg_dump -U "$POSTGRES_USER" -d keycloak' > backup_keycloak.sql
+tar -czf backup_files_$(date +%F).tar.gz \
+  backup_mde.sql backup_keycloak.sql \
+  mde-backend/lucene mde-backend/variables.json mde-backend/keystore \
+  codelists .env .client-env mde-nginx
+```
+
+### Restore-Ablauf
+
+1. Zielsystem und Zielversion werden festgelegt.
+2. Betroffene Container sind gestoppt.
+3. Datenbank-Backups werden in die Ziel-Datenbanken eingespielt.
+   Die Datenbanken müssen vor dem Restore bereits vorhanden sein;
+   der Restore legt keine Datenbanken automatisch an.
+4. Dateibasierte Sicherungen werden in die Ursprungsverzeichnisse zurückgeführt.
+5. Containerstart erfolgt mit anschließender Funktionsprüfung gemäß Abschnitt
+   5.3.
+
+Beispiel (Testumgebung):
+
+```bash
+podman compose -f docker-compose-test.yml down
+tar -xzf backup_files_YYYY-MM-DD.tar.gz
+podman compose -f docker-compose-test.yml up -d mde-postgres
+podman exec -i mde-postgres sh -lc \
+  'psql -U "$POSTGRES_USER" -d mde' < backup_mde.sql
+podman exec -i mde-postgres sh -lc \
+  'psql -U "$POSTGRES_USER" -d keycloak' < backup_keycloak.sql
+podman compose -f docker-compose-test.yml up -d
+``` */}
+
+{/* ## Monitoring und Logging
+
+### Monitoring-Ablauf
+
+Die Betriebsüberwachung umfasst:
+
+- Containerstatus (`podman ps`)
+- Containergesundheit, insbesondere NGINX-Healthcheck
+- API-Verfügbarkeit über `https://<HOST>/api/actuator/health`
+- Erreichbarkeit von Client, Keycloak und optional GNOS-Endpunkt
+
+Bei Suchproblemen steht ein Reindex über `/search/index/initialize` zur
+Verfügung.
+
+### Logging-Ablauf
+
+- Primärquelle ist der Container-Logstrom (`podman logs <container>`).
+- Backend-Logging wird über `mde-backend/log4j2.properties` gesteuert.
+- Das Backend stellt über Actuator eine Laufzeitanpassung von Logleveln bereit.
+- Bei Trace-Logging im Backend können CSW-T-Ausgaben im Verzeichnis `/tmp/` des
+  Backend-Containers anfallen.
+
+Beispiel für temporäre Loglevel-Anhebung:
+
+```bash
+curl -k https://<HOST>/api/actuator/loggers/de.terrestris \
+  -X POST \
+  --data-raw '{"configuredLevel":"TRACE"}' \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json"
+``` */}
+
+{/* ## Sicherheitskonzept
+
+### Sicherheitsprinzipien
+
+- Zugriff auf das System erfolgt ausschließlich über TLS-gesicherte Endpunkte.
+- Authentifizierung und Autorisierung erfolgen zentral über Keycloak und
+  Realm-Rollen.
+- Secrets und Zugangsdaten liegen ausschließlich in Betriebsdateien, nicht im
+  Quelltext.
+- Das Rollenmodell folgt dem Minimalprinzip.
+- Container werden nach Möglichkeit ohne Root-Rechte betrieben.
+
+### Konkrete Handlungsanweisungen und Verbote
+
+- Unzulässig ist die Ablage von `.env`, `.client-env`, Zertifikaten, privaten
+  Schlüsseln oder Client-Secrets in öffentlichen Repositories.
+- Unzulässig ist der dauerhafte Betrieb mit selbstsignierten Zertifikaten in
+  Produktivumgebungen ohne organisatorische Freigabe.
+- Unzulässig ist die Freischaltung interner Dienstports (z. B. Datenbankports)
+  in öffentliche Netze ohne Netzsegmentierung und Zugriffsschutz.
+- Erforderlich ist eine regelmäßige Rotation von Administrationspasswörtern und
+  Client-Secrets.
+- Erforderlich ist die zeitnahe Einspielung sicherheitsrelevanter Image-Updates.*/}
+
+{/* ## Betriebliche Rollen und Verantwortlichkeiten
+
+Die Rollenbeschreibung erfolgt bewusst auf grober Ebene:
+
+- Betriebsverantwortung Infrastruktur: Hostbetrieb, Containerlaufzeit, Netz,
+  TLS, Backup-Infrastruktur
+- Betriebsverantwortung Identity and Access Management (IAM):
+  Keycloak-Realm, Rollenmodell, Föderation, Benutzerlebenszyklus
+- Fachadministration MDE: Kodelisten, Variablenmapping, Freigabeprozesse im
+  Anwendungskontext
+- Anwenderrollen im System: `MdeAdministrator`, `MdeDataOwner`, `MdeEditor`,
+  `MdeQualityAssurance` */}
+
+{/* ## Deinstallation
+
+### Deinstallationsablauf
+
+1. Es liegt eine bestätigte Stilllegungsentscheidung vor.
+2. Finale Datensicherung ist erstellt und geprüft.
+3. Die Compose-Umgebung ist gestoppt und Container sind entfernt.
+4. Optional erfolgt die Entfernung persistenter Verzeichnisse und lokaler
+   Images.
+5. Zugangsdaten, Secrets und Zertifikate werden aus dem Zielsystem entfernt oder
+   archiviert.
+
+Beispielkommandos:
+
+```bash
+podman compose -f docker-compose-prod.yml down --volumes --remove-orphans
+podman image rm ghcr.io/gdi-be/mde-backend ghcr.io/gdi-be/mde-client
+# optional bei vollständiger Bereinigung:
+podman image prune -a
+```
+
+Hinweis: `podman image prune -a` kann auch andere ungenutzte Images
+außerhalb des MDE-Projekts entfernen.
+
+Die Entfernung persistenter Verzeichnisse erfolgt nur nach bestätigter
+Aufbewahrungs- und Löschfreigabe. */}
+
+{/* ## Build- und Releaseprozess (CI/CD)
+
+Für `mde-backend` und `mde-client` gelten:
+
+- Semantic Versioning für Versionsstände
+- Semantic Commit Convention für automatisierte Release-Auswertung
+- manuell ausgelöste GitHub-Release-Workflows
+  - `mde-backend`:
+    [Workflow](https://github.com/gdi-be/mde-backend/actions)
+  - `mde-client`:
+    [Workflow](https://github.com/gdi-be/mde-client/actions)
+
+Der Releaseprozess beinhaltet automatisiert:
+
+- Analyse der Commits zur Versionsbestimmung
+- Generierung von Release Notes und Changelog-Aktualisierung
+- Veröffentlichung von Releases
+  - `mde-backend`:
+    [Releases](https://github.com/gdi-be/mde-backend/releases)
+  - `mde-client`:
+    [Releases](https://github.com/gdi-be/mde-client/releases)
+- Erstellung und Veröffentlichung versionierter Container-Images in der
+  GitHub Container Registry (GHCR)
+  - `mde-client`:
+    [GHCR](https://github.com/gdi-be/mde-client/pkgs/container/mde-client)
+  - `mde-backend`:
+    [GHCR](https://github.com/gdi-be/mde-client/pkgs/container/mde-backend) */}
+
+Referenzen:
+
+- [Backend](https://github.com/gdi-be/mde-backend/actions)
+- [Client](https://github.com/gdi-be/mde-client/actions)
+- [semantic-release](https://semantic-release.gitbook.io/)

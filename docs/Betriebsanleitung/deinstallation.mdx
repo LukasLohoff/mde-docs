@@ -1,0 +1,31 @@
+---
+sidebar_position: 12
+hide_table_of_contents: false
+---
+
+# Deinstallation
+
+### Deinstallationsablauf
+
+1. Es liegt eine bestätigte Stilllegungsentscheidung vor.
+2. Finale Datensicherung ist erstellt und geprüft.
+3. Die Compose-Umgebung ist gestoppt und Container sind entfernt.
+4. Optional erfolgt die Entfernung persistenter Verzeichnisse und lokaler
+   Images.
+5. Zugangsdaten, Secrets und Zertifikate werden aus dem Zielsystem entfernt oder
+   archiviert.
+
+Beispielkommandos:
+
+```bash
+podman compose -f docker-compose-prod.yml down --volumes --remove-orphans
+podman image rm ghcr.io/gdi-be/mde-backend ghcr.io/gdi-be/mde-client
+# optional bei vollständiger Bereinigung:
+podman image prune -a
+```
+
+Hinweis: `podman image prune -a` kann auch andere ungenutzte Images
+außerhalb des MDE-Projekts entfernen.
+
+Die Entfernung persistenter Verzeichnisse erfolgt nur nach bestätigter
+Aufbewahrungs- und Löschfreigabe.

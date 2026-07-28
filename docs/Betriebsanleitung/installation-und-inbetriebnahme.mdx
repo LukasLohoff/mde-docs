@@ -1,0 +1,70 @@
+---
+sidebar_position: 5
+hide_table_of_contents: false
+---
+
+# Installation und Inbetriebnahme
+
+### Installationsablauf
+
+1. Das Repository `mde-deployment` liegt auf dem Zielserver im gewünschten Stand
+   vor.
+2. Die Umgebungsdateien werden aus den Beispielvorlagen abgeleitet und mit
+   standortspezifischen Werten gepflegt.
+3. Für privilegierte Ports wird auf Hostebene die Konfiguration
+   `net.ipv4.ip_unprivileged_port_start=80` gesetzt.
+4. Die Inbetriebnahme erfolgt mit der passenden Compose-Datei:
+   - Test: `docker-compose-test.yml`
+   - Produktion: `docker-compose-prod.yml`
+5. Nach dem ersten Start erfolgt ein zweiter Startzyklus, falls
+   Initialisierungsabhängigkeiten beim Erstlauf zu verzögerter
+   Containerbereitschaft führen.
+
+Beispielkommandos:
+
+```bash
+cp .env.example .env
+cp .client-env.example .client-env
+cp mde-backend/variables-example.json mde-backend/variables.json
+
+podman compose -f docker-compose-test.yml up -d
+# optionaler zweiter Startzyklus
+podman compose -f docker-compose-test.yml down
+podman compose -f docker-compose-test.yml up -d
+```
+
+Weiterführende Installationshinweise sind in der Projekt-README dokumentiert:
+
+- [README](https://github.com/gdi-be/mde-deployment/blob/main/README.md)
+
+### Keycloak-Basiskonfiguration
+
+Die Betriebsfähigkeit setzt folgende Keycloak-Konfiguration voraus:
+
+- Realm: `metadata-editor`
+- Realm-Rollen:
+  - `MdeAdministrator`
+  - `MdeDataOwner`
+  - `MdeEditor`
+  - `MdeQualityAssurance`
+- Client: `mde`
+- Redirect-URI passend zur Zieldomäne (z. B. `https://metadata.de/*`)
+- aktivierte Optionen für Client Authentication, Direct Access Grants und
+  Service Account Roles
+- falls unter Service Account Roles die Rollen `realm-management` bzw.
+  `realm-admin` fehlt, erfolgt deren zusätzliche Zuweisung
+- Übernahme des Client-Secret in `.env` und `.client-env`
+
+Für AD-Föderation gelten die in `mde-deployment/README.md` beschriebenen
+LDAP-/LDAPS-Parameter.
+
+### Installationsprüfung
+
+Die Installation gilt als abgeschlossen, wenn:
+
+- alle erwarteten Container im Status `running` sind
+- `https://<HOST>/` den Client ausliefert
+- `https://${KEYCLOAK_HOST}/api/actuator/health` per `curl` mit gültigem
+  Bearer-Token erreichbar ist
+- `https://<HOST>/auth/` erreichbar ist
+- Anmelde- und Rollenprüfung im Client erfolgreich ist

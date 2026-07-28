@@ -1,0 +1,50 @@
+---
+sidebar_position: 4
+hide_table_of_contents: false
+---
+
+# Systemvoraussetzungen
+
+### Infrastruktur und Betriebssystem
+
+- Linux-Server mit aktuellem Sicherheitsstand
+- x86_64-kompatible Laufzeitumgebung für die verwendeten Container-Images
+- Root- oder gleichwertige Administrationsrechte für Netz- und
+  Dateisystemkonfiguration
+- persistenter Speicher für Daten- und Konfigurationsverzeichnisse
+- funktionierende DNS-Auflösung für interne und externe Zielsysteme
+- gültige Systemzeit (NTP-Synchronisation)
+
+### Software und Werkzeuge
+
+- `git`
+- `podman`
+- `podman compose`
+- `curl` (Betriebsprüfung und Healthchecks)
+- `keytool` (bei Zertifikatsimport in Java-Keystores)
+- PostgreSQL-Werkzeuge (`pg_dump`, `pg_restore` bzw. `psql`) für Backup/Restore
+
+### Netzwerk und Ports
+
+- Eingehend: TCP 80/443 für NGINX
+- Intern im Compose-Verbund: 3000 (Client), 8080 (Backend/Keycloak/GNOS), 5432
+  (PostgreSQL), 9200 (Elasticsearch, Test)
+- In der Produktivumgebung: Erreichbarkeit der externen PostgreSQL- und
+  GNOS-Endpunkte
+
+### Dateien und Verzeichnisse
+
+Vor dem Start liegen folgende Dateien vollständig vor:
+
+- `.env` (abgeleitet aus `.env.example`)
+- `.client-env` (abgeleitet aus `.client-env.example`)
+- `mde-backend/variables.json` (abgeleitet aus `variables-example.json`)
+- NGINX-Zertifikat und privater Schlüssel gemäß ausgewählter Compose-Datei
+
+Persistente Verzeichnisse sind vorhanden und beschreibbar:
+
+- `mde-backend/lucene`
+- `mde-backend/keystore`
+- `mde-postgres/postgresql_data` (Test)
+- optionale GNOS-/Elasticsearch-Datenverzeichnisse (Test)
+- `codelists`

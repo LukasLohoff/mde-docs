@@ -1,0 +1,50 @@
+---
+sidebar_position: 6
+hide_table_of_contents: false
+---
+
+# Betrieb und Pflege
+
+### Regelbetrieb
+
+- Start, Stopp und Neustart erfolgen über die eingesetzte Compose-Datei.
+- Konfigurationsänderungen an `.env`, `.client-env`, `variables.json`,
+  `log4j2.properties` oder NGINX-Konfiguration werden durch Containerneustart
+  wirksam.
+- Pflege der Codelisten erfolgt in `codelists/`; Änderungen sind unmittelbar
+  Bestandteil des laufenden Systems nach Neustart der betroffenen Container (siehe auch [hier](#konfiguration-per-codelisten))
+
+### Updates
+
+Updates erfolgen durch `git pull` mit anschließendem Neustart der betroffenen
+Container.
+
+Der Updateablauf besteht aus:
+
+1. Aktualisierung des Repository-Standes (`git pull`).
+2. Plausibilitätsprüfung geänderter Konfigurationsdateien.
+3. Neustart der betroffenen Container.
+4. Wiederholung der Installationsprüfung gemäß Abschnitt 5.3.
+
+### Fehlerbehebung
+
+Typische Betriebsstörungen und zugehörige Maßnahmen:
+
+- Bei Berechtigungsproblemen mit gemounteten Volumes erfolgt die Prüfung von
+  Besitz- und Zugriffsrechten auf Hostebene. Ergänzend kann die Volume-Option
+  `,U` (Komma-U) verwendet werden, um UID/GID-Anpassungen durchzuführen.
+- Bei Einsatz selbstsignierter Zertifikate erfolgt der Import des Zertifikats in
+  den `cacerts`-Keystore des jeweils betroffenen Containers. Beispiel:
+
+```bash
+keytool -import -file /tmp/localhost.crt -alias DEV \
+  -keystore /usr/lib/jvm/temurin-21-jdk-amd64/lib/security/cacerts \
+  -noprompt -storepass changeit
+```
+
+- Fehlt ein gültiges Zertifikat für die Systemdomäne, erfolgt der Import im
+  Container `mde-backend`.
+- Fehlt ein gültiges Zertifikat für Active Directory, erfolgt der Import im
+  Container `mde-keycloak`.
+- Fehlt ein gültiges Zertifikat für GNOS, erfolgt der Import im Container
+  `mde-backend`.

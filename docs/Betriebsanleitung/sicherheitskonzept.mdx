@@ -1,0 +1,41 @@
+---
+sidebar_position: 10
+hide_table_of_contents: false
+---
+
+# Sicherheitskonzept
+
+### Sicherheitsprinzipien
+
+- Zugriff auf das System erfolgt ausschließlich über TLS-gesicherte Endpunkte.
+- Authentifizierung und Autorisierung erfolgen zentral über Keycloak und
+  Realm-Rollen.
+- Secrets und Zugangsdaten liegen ausschließlich in Betriebsdateien, nicht im
+  Quelltext.
+- Das Rollenmodell folgt dem Minimalprinzip.
+- Container werden nach Möglichkeit ohne Root-Rechte betrieben.
+
+### Konkrete Handlungsanweisungen und Verbote
+
+- Unzulässig ist die Ablage von `.env`, `.client-env`, Zertifikaten, privaten
+  Schlüsseln oder Client-Secrets in öffentlichen Repositories.
+- Unzulässig ist der dauerhafte Betrieb mit selbstsignierten Zertifikaten in
+  Produktivumgebungen ohne organisatorische Freigabe.
+- Unzulässig ist die Freischaltung interner Dienstports (z. B. Datenbankports)
+  in öffentliche Netze ohne Netzsegmentierung und Zugriffsschutz.
+- Erforderlich ist eine regelmäßige Rotation von Administrationspasswörtern und
+  Client-Secrets.
+- Erforderlich ist die zeitnahe Einspielung sicherheitsrelevanter Image-Updates.
+
+## Betriebliche Rollen und Verantwortlichkeiten
+
+Die Rollenbeschreibung erfolgt bewusst auf grober Ebene:
+
+- Betriebsverantwortung Infrastruktur: Hostbetrieb, Containerlaufzeit, Netz,
+  TLS, Backup-Infrastruktur
+- Betriebsverantwortung Identity and Access Management (IAM):
+  Keycloak-Realm, Rollenmodell, Föderation, Benutzerlebenszyklus
+- Fachadministration MDE: Kodelisten, Variablenmapping, Freigabeprozesse im
+  Anwendungskontext
+- Anwenderrollen im System: `MdeAdministrator`, `MdeDataOwner`, `MdeEditor`,
+  `MdeQualityAssurance`

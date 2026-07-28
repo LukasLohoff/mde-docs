@@ -1,0 +1,433 @@
+---
+sidebar_position: 1
+---
+
+- [Allgemeines](./allgemeines.mdx)
+  - [Technische Voraussetzungen für Nutzende](./allgemeines.mdx#technische-voraussetzungen-für-nutzende)
+  - [Barrierearmut](./allgemeines.mdx#barrierearmut)
+- [Rollen](./rollen.mdx)
+- [Die Oberfläche und ihre Funktionen](./oberflaeche.mdx)
+  - [Startseite](./oberflaeche.mdx#startseite)
+  - [Anmeldung](./oberflaeche.mdx#anmeldung)
+  - [Breadcrumb-Navigation](./oberflaeche.mdx#breadcrumb-navigation)
+  - [Mein Account](./oberflaeche.mdx#mein-account)
+  - [Übersicht der Metadatensätze](./oberflaeche.mdx#übersicht-der-metadatensätze)
+  - [Neuerfassung eines Metadatensatzes](./oberflaeche.mdx#neuerfassung-eines-metadatensatzes)
+  - [Metadatensätze filtern](./oberflaeche.mdx#metadatensätze-filtern)
+  - [Metadaten-Formular](./oberflaeche.mdx#metadaten-formular)
+- [Arbeitsabläufe](./arbeitsablaeufe.mdx)
+  - [Neuen Metadatensatz anlegen und Metadaten einpflegen](./arbeitsablaeufe.mdx#neuen-metadatensatz-anlegen-und-metadaten-einpflegen)
+  - [Bestehenden Metadatensatz pflegen](./arbeitsablaeufe.mdx#bestehenden-metadatensatz-pflegen)
+  - [Zuweisen](./arbeitsablaeufe.mdx#zuweisen)
+- [Glossar](./glossar.mdx)
+- [Hilfe & Support](./hilfe-support.mdx)
+
+{/* ## Allgemeines
+
+### Technische Voraussetzungen für Nutzende
+
+Um den Metadateneditor (MDE) nutzen zu können, wird ein moderner Browser benötigt:
+
+- Mozilla Firefox (Version 148 oder höher)
+- Microsoft Edge (Version 145 oder höher)
+- Google Chrome (Version 146 oder höher)
+
+JavaScript muss aktiviert sein, um die volle Funktionalität des MDE zu gewährleisten. Es wird empfohlen, die neueste Version eines der genannten Browser zu verwenden, um eine optimale Leistung und Sicherheit zu gewährleisten.
+
+### Barrierearmut
+
+Der Metadateneditor wurde mit dem Ziel entwickelt, eine möglichst barrierefreie Nutzung zu ermöglichen. Die Benutzeroberfläche basiert auf den Richtlinien des Material Design Accessibility Frameworks und berücksichtigt dabei zentrale Anforderungen an eine zugängliche Gestaltung.
+
+Folgende Funktionen unterstützen die barrierefreie Nutzung:
+
+**Tastaturnavigation**
+
+- Alle interaktiven Elemente sind über die Tastatur erreichbar und bedienbar
+- Die TAB-Reihenfolge der Seite ist logisch aufgebaut
+- Der Tastaturfokus wird bei neuen Inhalten automatisch auf diese gelenkt
+- Interaktive Steuerelemente wie Drop-down-Menüs sind über die Tastatur fokussierbar
+- Der Fokus wird niemals auf einem Element fixiert oder eingefroren
+
+**Unterstützung für Screenreader**
+
+- Alle Schaltflächen und interaktive Elemente verfügen über zugängliche Namen
+- Das Fokusmanagement erleichtert die Orientierung für Screenreader-Nutzende
+- Semantisch korrekte HTML-Strukturen unterstützen assistive Technologien
+- Überschriften werden in fortlaufender Reihenfolge angezeigt und geben der Seite eine logische Struktur
+- Formularelemente sind mit beschreibenden Labels verknüpft
+- Die Sprachangabe ermöglicht eine korrekte Textausgabe durch Screenreader
+
+**Visuelle Gestaltung**
+
+- Kontrastreiche Gestaltung sorgt für bessere Lesbarkeit
+- Bildelemente verfügen über beschreibende alternative Texte
+- Die Zoomfunktion ist aktiviert und ermöglicht Nutzenden mit eingeschränktem Sehvermögen eine Bildschirmvergrößerung
+- Berührungszielbereiche haben eine ausreichende Größe und ausreichend Abstand
+
+Der Metadateneditor wurde sowohl mit automatisierten Tools als auch manuell auf Barrierearmut geprüft. Als Ergebnis kann festgehalten werden, dass der MDE mit der BITV 2.0 (Barrierefreie-Informationstechnik-Verordnung) weitestgehend vereinbar ist. Bei der Weiterentwicklung des Systems findet die BITV 2.0 weiterhin Beachtung. */}
+
+{/* ## Rollen
+
+Folgende Rollen sind im Metadateneditor (MDE) implementiert:
+
+- Datenhaltende Stelle - DHS
+  - Kann neue Datensätze anlegen
+  - Kann bestehende Datensätze bearbeiten
+- Redakteur
+  - Ergänzt Datensätze, die von einer DHS angelegt wurden
+  - Kann selbst neue Datensätze erfassen
+- Qualitätssicherung – QS
+  - Übernimmt die fachliche und formale Prüfung der Datensätze
+- Administrator
+  - Kann alle Datensätze bearbeiten
+  - Kann Statusänderungen vornehmen
+
+Beim Anmelden am MDE wird die Rolle automatisch über die Software Keycloak ermittelt. Angemeldete Nutzende erhalten entsprechend ihrer Rolle die jeweiligen Berechtigungen und Funktionen. */}
+
+{/* ## Die Oberfläche und ihre Funktionen
+
+### Startseite
+
+Nach dem Aufruf der URL des Metadateneditors erscheint die Startseite. Über die Schaltfläche „Anmeldung“ kann die Anmeldemaske geöffnet werden.
+
+<img width="569" height="206" alt="login_mde" src="https://github.com/user-attachments/assets/6f93a804-5e72-4fd1-a7df-28e2818eb97c" />
+
+### Anmeldung
+
+Nutzende melden sich mit ihrem Benutzernamen und Passwort am System an.
+
+Nach der Anmeldung wird den Nutzenden eine Begrüßungsseite angezeigt.
+
+Über den Link „Zur Metadaten Übersicht“ gelangen die Nutzenden zur Übersicht aller Metadaten, Details dazu gibt es [hier](#übersicht-der-metadatensätze).
+
+### Breadcrumb-Navigation
+
+Im linken Bereich der Kopfzeile befindet sich die Breadcrumb-Navigation:
+
+<img width="124" height="43" alt="breadcrumb1" src="https://github.com/user-attachments/assets/f04d726f-726c-4a4a-be22-5d8a42d7fd51" />
+
+Die Breadcrumb-Navigation ermöglicht den Nutzenden eine direkte Navigation während der Bearbeitung von Metadaten.
+
+An erster Stelle wird das Home-Symbol für die Begrüßungsseite angezeigt. Bei Klick springt man in diese Seite.
+
+An zweiter Stelle folgt mit der Beschriftung "Metadaten" der Link zur Übersicht der Metadaten ohne aktive Filter. Ein Klick dorthin öffnet die [Metadatenübersicht](#übersicht-der-metadatensätze).
+
+Haben Nutzende einen Metadatensatz geöffnet, wird die ID des Datensatzes als Link angezeigt. Am Ende der Breadcrumb-Navigation wird dem Benutzer durch „readonly" signalisiert, wenn er sich in der Leseansicht befindet.
+
+<img width="517" height="41" alt="breadcrumb" src="https://github.com/user-attachments/assets/56eb1cfe-ac34-4abe-9e85-b4464d520b9a" />
+
+Aus der Leseansicht eines Datensatzes können Nutzende über den Link auf die ID per Klick die Editieransicht des Datensatzes öffnen, sofern sie über die notwendigen Berechtigungen verfügen. Die „readonly"-Markierung verschwindet entsprechend im Breadcrumb-Menü.
+
+<img width="448" height="40" alt="breadcrumb_edit" src="https://github.com/user-attachments/assets/9c5fc7d1-1e32-4875-b6bd-2e61ab4307e6" />
+
+
+### Mein Account
+
+Oben rechts in der Kopfzeile der Oberfläche wird den Nutzenden über die Schaltfläche „Mein Account“ der Benutzername, die Rolle sowie die verbleibende Dauer der Sitzung angezeigt. Zudem haben sie dort die Möglichkeit, sich vom System abzumelden.
+
+Bei jedem Speichern bzw. bei jeder Änderung der Angaben zu einem Metadatensatz wird die Session erneuert. Dieser Mechanismus greift nach fünf Minuten Tätigkeit im MDE. Erfolgt keine aktive Tätigkeit durch eine Eingabe innerhalb der gültigen Session von 30 Minuten, werden Nutzende vom System abgemeldet.
+
+### Übersicht der Metadatensätze
+
+Die Übersichtsseite ist der zentrale Einstiegspunkt für die weiteren Arbeitsschritte.
+
+<img alt="mde_uebersicht_md" src="https://github.com/user-attachments/assets/63f3b0ea-de50-4fa4-950a-91ad9ecb04fa" />
+
+Zunächst werden dn Nutzenden alle Metadatensätze des Systems angezeigt.
+
+Die Sortierung hängt hierbei von der Rolle und vom Status des Metadatensatzes ab. Sie werden in folgender Reihenfolge angezeigt:
+
+- alle Metadatensätze, die Nutzende in Bearbeitung haben. Hierbei werden die Datensätze mit dem aktuellsten Bearbeitungsdatum priorisiert
+- alle Metadatensätze, die der Rolle der Nutzenden zugeordnet sind in einer alphabetischen Sortierung über den Titel des Metadatensatzes
+- alle weiteren Metadatensätze, alphabetisch sortiert
+
+Die Metadatensätze werden als Kacheln dargestellt und zeigen die folgenden Angaben und Funktionsbuttons, wobei letztere von der Rolle und dem Status des Datensatzes abhängig sind:
+
+- den Titel
+- das Vorschaubild als Link zur Leseansicht
+- ein Banner mit dem Datum der letzten Veröffentlichung
+- Angaben zum Status des Datensatzes
+- Funktionsbuttons
+
+![](https://github.com/gdi-be/mde-deployment/raw/main/docs/kachel.png)
+
+Die Status sind:
+
+| Icon                                                                                                                                              | Funktion                      | Beschreibung                                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/zu_bearbeiten.png)                                                                     | zu bearbeiten                 | der Datensatz ist bereits von anderen angemeldeten Personen in Bearbeitung genommen worden und ist damit für andere Nutzende für eine Bearbeitung gesperrt                               |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/meine_metadaten.png)                                                                   | Meine Metadaten               | Nutzende haben bereits an diesem Datensatz gearbeitet und sind damit im Team der Bearbeitenden. Damit kann der Datensatz ihnen direkt zugewiesen werden (siehe [Zuweisen](#zuweisen) von Datensätzen) |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/redaktion.png) <br></br> ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/qs.png) | Angabe zur zugewiesenen Rolle | die dem Datensatz zur Bearbeitung zugewiesene Rolle wird für die Rollen Redaktion und QS angezeigt                                                                                   |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/geprueft.png)                                                                          | Geprüft                       | der Datensatz wurde durch die Qualitätssicherung geprüft und für die Veröffentlichung freigegeben                                                                                    |
+
+Folgende Funktionen sind über entsprechende Buttons an der Kachel implementiert. Diese variieren je nach Rolle und Berechtigungen der jeweiligen Nutzenden.
+
+| Icon                                                                    | Funktion                                           | Beschreibung                                                                                                                                                                                                                                                                                                                  |
+| ----------------------------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/delete.png)  | Löschen                                            | je nach Berechtigung können Nutzende einen Datensatz löschen. Es erfolgt zunächst eine Sicherheitsabfrage, die bestätigt werden muss, um den Datensatz endgültig zu löschen.                                                                                                                                                |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/comment.png) | Kommentieren                                       | es öffnet sich der Dialog zum Kommentieren von Datensätzen                                                                                                                                                                                                                                                                    |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/print.png)   | Drucken                                            | öffnet die Leseansicht mit aktivierter Druckfunktion des Browsers                                                                                                                                                                                                                                                             |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/edit.png)    | Bearbeiten                                         | öffnet das Formular zum Editieren des Datensatzes                                                                                                                                                                                                                                                                             |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/takeup.png)  | In Bearbeitung nehmen                              | Nutzende können sich je nach Berechtigung den Datensatz zur Bearbeitung zuweisen oder ihre Zuweisung entfernen, so dass eine andere Person den Datensatz in Bearbeitung nehmen kann. Ein Datensatz, den sich eine Person zugewiesen hat (in Bearbeitung genommen hat), ist für andere Personen zur Bearbeitung gesperrt. |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/remove.png)  | Die Bearbeitung beenden und die Zuordnung aufheben | Nutzende entfernen hier ihre Zuweisung als Bearbeitende. Damit ist der Datensatz der Rolle weiterhin zugewiesen und der Datensatz für Nutzende der Rolle bearbeitbar.                                                                                                                                                     |
+
+Über Paging-Elemente unterhalb der Metadatenübersicht kann durch die einzelnen Seiten geblättert werden und die Anzahl der Datensätze, die pro Seite angezeigt werden sollen, verändert werden.
+
+<img width="413" height="34" alt="paging_mde" src="https://github.com/user-attachments/assets/3ef38fa6-7c2b-4bc6-b62b-7148dfc56691" />
+
+
+### Neuerfassung eines Metadatensatzes
+
+![](https://github.com/gdi-be/mde-deployment/raw/main/docs/neuerfassung_button.png)
+
+Über die entsprechende Schaltfläche öffnet sich der Dialog zum Erfassen eines neuen Datensatzes:
+
+![](https://github.com/gdi-be/mde-deployment/raw/main/docs/neuerfassung.png)
+
+Zunächst muss der Titel des neu zu erfassenden Metadatensatzes eingegeben werden. Nutzende können einen bereits bestehenden Metadatensatz als Vorlage auswählen. Dafür steht ihnen eine Suche nach Metadatensätzen zur Verfügung. Die Suche durchsucht bestehende Metadatensätze als Teil des Titels, wobei die Eingabe ohne Berücksichtigung der Groß- und Kleinschreibung gesucht wird.
+
+Nach der Eingabe des Titels und ggf. der Auswahl einer Vorlage wird mit einem Klick auf den Button „Metadaten Anlegen“ das Formular zur Eingabe der Metadaten geöffnet. Details zum Formular finden sich in [diesem](#metadaten-formular) Kapitel.
+
+Wurde für den neuen Metadatensatz eine Vorlage genutzt, werden ausgewählte Felder des neuen Metadatensatzes bereits aus der Vorlage übernommen. Weitere Felder können über einen entsprechenden Button am rechten Rand der Eingabe aus der Vorlage nachträglich übernommen werden. Details dazu finden sich im [Metadaten-Formular-Kapitel](#metadaten-formular).
+
+Im Falle der Neuerfassung eines Metadatensatzes ist dieser bereits einer Person zugewiesen, nämlich der nutzenden Person, die den Datensatz angelegt hat. Diese kann den Datensatz direkt bearbeiten oder auch anderen Nutzenden zuweisen.
+
+### Metadatensätze filtern
+
+#### Filter Eingabe
+
+Über ein Eingabefeld kann die Anzeige der Metadatensätze eingeschränkt werden. Es wird das Vorkommen der Zeichenkette ohne Berücksichtigung von Groß- und Kleinschreibung für den Filter verwendet.
+
+<img width="342" height="69" alt="suche_filter" src="https://github.com/user-attachments/assets/633c74ee-585b-4f6b-8bc7-f1a1991abb3e" />
+
+
+#### Statusfilter
+
+Je nach Rolle stehen Nutzenden vordefinierte Filter zur Verfügung. Aktive Filter werden durch ein Häkchen markiert sowie farblich hervorgehoben.
+
+<img width="523" height="91" alt="Statusfilter" src="https://github.com/user-attachments/assets/c8a9cef6-b876-4661-a1fb-2d030e3dc46f" />
+
+Die vordefinierten Filter variieren je nach Rolle der nutzenden Person.
+
+Diese sind:
+
+- **zu bearbeiten** – der Filter zeigt lediglich die Metadatensätze an, die der nutzenden Person zugewiesen sind.
+- **Meine Metadaten** – es werden nur Metadatensätze angezeigt, bei denen die nutzende Person im Team ist, d.h. sie war bereits an der Bearbeitung dieser Metadatensätze beteiligt
+- **Geprüft** – der Filter zeigt nur Datensätze an, die von der Rolle QS als geprüft markiert wurden
+- **jeweilige Rolle** – Nutzende können die Datensätze filtern, die ihrer Rolle zugewiesen wurden. Dieser Filter steht der Rolle DHS nicht zur Verfügung, da die Zuweisung sich immer auf eine nutzende Person bezieht.
+
+Hinweis: Wollen Nutzende aus der Einzelansicht eines Metadatensatzes zurück auf die Übersicht der Metadatensätze mit bereits festgelegten Filtern navigieren, können sie dies über den Zurück-Button des Browsers vornehmen. Alle Filter sind zudem in der URL als Parameter vorhanden, so dass sie über die Lesezeichen-Funktion des Browsers Filterkombinationen als Lesezeichen ablegen können.
+
+### Metadaten-Formular
+
+Über das Metadaten-Formular werden die Metadaten eingepflegt und bearbeitet.
+
+<img alt="formular" src="https://github.com/user-attachments/assets/96272b8c-28ed-45da-9f24-47f94fe1a66b" />
+
+Das Eingabeformular ist in fünf Bereiche unterteilt:
+
+1. Basisangaben
+2. Einordnung
+3. Zeitliche und Räumliche Angaben
+4. Weitere Angaben
+5. Dienste
+
+Diese werden als „Karteireiter“ unterhalb des Titels angezeigt und können dort direkt angesteuert werden. Unterhalb der Beschriftung des jeweiligen Reiters signalisiert ein Balken, inwieweit die Vollständigkeit der Angaben erreicht ist. Der Fortschrittsbalken ist grün eingefärbt, der Hintergrund rot, sodass sich leicht erkennen lässt, welche Angaben noch fehlen. Ein Überfahren des Balkens mit der Maus zeigt den prozentualen Erfüllungsstand der Pflichtangaben.
+
+<img alt="fortschrittsbalken" src="https://github.com/user-attachments/assets/dc78dd48-2573-4791-a0c8-75b8e761c09c" />
+
+Das Formular besteht aus einer Vielzahl verschiedener Formularelement-Typen. Je nach Art der Eingabe variiert der Typ und ist auf die Eingabe optimiert. Begrenzungen von Texteingaben hinsichtlich ihrer Länge werden am Formularfeld signalisiert.
+
+Eingaben werden automatisch gespeichert, sobald die nutzende Person das Eingabefeld verlässt. Es ist nicht notwendig, die Eingaben manuell zu speichern. Alle Änderungen werden automatisch in der Datenbank gespeichert. Das erfolgreiche Speichern wird durch ein blaues Häkchen am rechten Rand des Eingabefeldes signalisiert.
+
+![](https://github.com/gdi-be/mde-deployment/raw/main/docs/haken.gif)
+
+Fehlende Pflichtangaben oder fehlerhafte Eingaben werden im Formular selbst mit einem roten Rahmen hervorgehoben.
+
+<img alt="pflichtfeld" src="https://github.com/user-attachments/assets/3fb1cec3-ac68-445e-bd52-8ad9cfd05ce2" />
+
+Rechts neben den Eingabefeldern oder auch links oben an Eingabebereichen werden ggf. weitere Funktionen angeboten:
+
+| Icon                                                                   | Funktion                              | Beschreibung                                                                                                                   |
+| ---------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/help.png)   | Hilfe                                 | am rechten Rand des Formulars wird eine ausführliche Hilfe zu den Angaben des Formularfeldes angezeigt, siehe [hier](#hilfe-funktion)                         |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/copy.png)   | Kopieren                              | die Werte können in die Zwischenablage kopiert werden, um sie ggf. in andere Formulare einzufügen                              |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/adopt1.png) | Wert aus Vorlage übernehmen           | als Eingabehilfe können ggf. Werte übernommen werden, z.B. die Kontaktdaten der nutzenden Person aus den Angaben des AD bzw. Keycloak |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/adopt2.png) | Werte aus Vorlagedatensatz übernehmen | Es werden Werte aus dem Datensatz, der als Vorlage diente, übernommen                                                          |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/delete.png) | Löschen                               | es können Eingabebereiche entfernt werden, nachdem eine Sicherheitsabfrage bestätigt wurde                                     |
+
+Unterhalb des Formulars werden in einer Fußzeile die folgenden Funktionen angeboten:
+
+| Icon                                                                           | Beschreibung                                                                                                                                                                                                       |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/kommentare.png)     | es können Kommentare zum jeweiligen Metadatensatz hinterlegt werden. Der jeweils letzte Kommentar kann wieder gelöscht werden, Beispiel siehe [hier](#kommentare)                                                                                    |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/zurueck_weiter.png) | wechselt in den jeweils nächsten oder vorhergehenden Karteireiter                                                                                                                                                  |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/download.png)       | erzeugt einen Export aller ISO-Metadatendokumente und bietet diese in einem Zip-Archiv zum Download an                                                                                                             |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/validieren.png)     | prüft die Eingaben gegen die Testklassen der GDI-Testsuite und gibt die Ergebnisse aus, Beispiel siehe [hier](#validierung)                                                                                                                             |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/zuweisen.png)       | Ermöglicht das [Zuweisen](#zuweisen) des Metadatensatzes zu einer Rolle oder auch einr bestimmten nutzenden Person. Im Falle der QS kann hier auch der Metadatensatz als geprüft markiert werden.                                         |
+| ![](https://github.com/gdi-be/mde-deployment/raw/main/docs/freigabe.png)       | Ein von der QS als geprüft markierter, vollständig ausgefüllter Metadatensatz kann veröffentlicht werden. Dies bedeutet, dass der Metadatensatz im GeoNetwork opensource als als Datensatz im Metadatenkatalog veröffentlicht wird, Beispiel siehe [hier](#freigabe) |
+
+#### Hilfe-Funktion
+
+Klicken Nutzende am rechten Rand des Formularfeldes auf die entsprechende Schaltfläche, so wird eine ausführliche Hilfe zu den Angaben des Formularfeldes angezeigt.
+
+<img alt="hilfefunktion" src="https://github.com/user-attachments/assets/8400a00d-f30f-4930-b7cd-c775d4dd8fba" />
+
+#### Kommentare
+
+Es können Kommentare zum jeweiligen Metadatensatz hinterlegt werden.
+
+<img alt="kommentar" src="https://github.com/user-attachments/assets/9476cef0-0003-4da6-9084-b2c2aad9f544" />
+
+#### Validierung
+
+Es werden die Eingaben gegen die Testklassen der GDI-Testsuite validiert und das Ergebnis ausgegeben.
+
+<img alt="validate" src="https://github.com/user-attachments/assets/ef53f28d-e6f3-4eba-9abc-ab2c8e2e7149" />
+
+#### Freigabe
+
+Per Klick auf den Freigabe-Button öffnet sich der Dialog, mit dem die Freigabe gestartet werden kann.
+
+<img alt="freigabe1" src="https://github.com/user-attachments/assets/d98eb967-a33f-43fe-bde0-16b2a467d55b" />
+
+Nach erfolgreicher Freigabe und Veröffentlichung der Metadaten im GeoNetwork opensource können die erstellten Metadaten per Link aufgerufen werden.
+
+<img alt="freigabe2" src="https://github.com/user-attachments/assets/e4750b12-e5a8-4e8d-a1db-1bd13ed1970a" />
+
+## Arbeitsabläufe
+
+Die folgende Skizze zeigt die Arbeitsabläufe, die im MDE implementiert sind. Je nach Rolle, Berechtigungen und Status eines Metadatensatzes sind unterschiedliche Arbeitsabläufe möglich. Es ist zu beachten, dass die Arbeitsabläufe nicht strikt linear sind, sondern je nach Situation und Berechtigungen variieren können. In den meisten Fällen findet dabei eine iterative Interaktion zwischen den Rollen statt, um die Qualität der Metadatensätze zu gewährleisten.
+
+![Workflow](https://github.com/gdi-be/mde-deployment/raw/main/docs/workflow.png "Workflow")
+
+Im Folgenden werden die wichtigsten Arbeitsabläufe detailliert beschrieben.
+
+### Neuen Metadatensatz anlegen und Metadaten einpflegen
+
+Sowohl Nutzende der Rolle DHS als auch Redaktion können einen neuen Metadatensatz anlegen. Dazu nutzen sie die [hier](#neuerfassung) beschriebene Funktion der Neuerfassung.
+
+Anschließend werden im [Metadaten-Formular](#metadaten-formular) die Metadaten eingegeben.
+
+Wurde der Datensatz von der Rolle DHS angelegt, muss er im nächsten Schritt einer nutzenden Person der Rolle Redaktion zur Bearbeitung zugewiesen werden. Details dazu finden Sie weiter unten im Abschnitt [Zuweisen](#zuweisen). Diese ergänzt ggf. notwendige Informationen und übergibt den Datensatz anschließend an die Qualitätssicherung. Dort wird der Datensatz geprüft und ggf. zurück an die Redaktion gegeben, um weitere Ergänzungen vorzunehmen.
+
+Sobald der Datensatz von der Qualitätssicherung als geprüft markiert wurde, geht er zurück an eine nutzende Person der Rolle Redaktion und kann veröffentlicht werden.
+
+Sobald der Datensatz veröffentlicht ist, wird er im GeoNetwork opensource als Datensatz im Metadatenkatalog veröffentlicht.
+
+### Bestehenden Metadatensatz pflegen
+
+Um einen bestehenden Metadatensatz zu pflegen, muss dieser zunächst in der [Übersicht der Metadatensätze](#übersicht-der-metadatensätze) geöffnet werden. Der Metadatensatz muss sich dabei im [Status](#statusfilter) „zu bearbeiten“ befinden, d.h. er muss einer nutzenden Person zur Bearbeitung zugewiesen sein. Details zum Thema Zuweisung finden sich [hier](#zuweisen).
+
+Die Pflege und Bearbeitung der Metadaten selbst erfolgt dann über das [Metadaten-Formular](#metadaten-formular).
+
+![](https://github.com/gdi-be/mde-deployment/raw/main/docs/formular.png)
+
+Wurde der Datensatz von der Rolle DHS bearbeitet, muss er im nächsten Schritt erst wieder einer nutzenden Person der Rolle Redaktion zur Bearbeitung zugewiesen werden. Details dazu finden Sie weiter unten im Abschnitt [Zuweisen](#zuweisen). Diese ergänzt ggf. notwendige Informationen und übergibt den Datensatz anschließend an die Qualitätssicherung. Dort wird der Datensatz geprüft und ggf. zurück an die Redaktion gegeben, um weitere Ergänzungen vorzunehmen.
+
+Sobald der Datensatz von der Qualitätssicherung als geprüft markiert wurde, geht er zurück an eine nutzende Person der Rolle Redaktion und kann veröffentlicht werden.
+
+Sobald der Datensatz veröffentlicht ist, wird er im GeoNetwork opensource als Datensatz im Metadatenkatalog veröffentlicht.
+
+### Zuweisen
+
+Da ein Metadatensatz dem Arbeitsablauf folgt und innerhalb des Arbeitsablaufs von verschiedenen Nutzenden bearbeitet werden kann, ist es notwendig, dass ein Metadatensatz einer nutzenden Person oder einer Rolle zugewiesen wird. Dadurch wird sichergestellt, dass der Datensatz nicht von mehreren Nutzenden gleichzeitig bearbeitet wird, was zu Konflikten führen könnte. Zudem ermöglicht die Zuweisung die Nachverfolgung der Bearbeitungshistorie eines Datensatzes.
+
+In der Fußzeile des Editier-Formulars wird die Funktion „Zuweisen" angeboten, um einen Metadatensatz einer Rolle oder einer bestimmten nutzenden Person zuzuweisen. Je nach Rolle der nutzenden Person und Status des Metadatensatzes stehen unterschiedliche Optionen zur Zuweisung zur Verfügung. Bei Betätigung der Schaltfläche „Zuweisen" öffnet sich ein Dialog, in dem die verfügbaren Optionen angezeigt werden. Dieser sieht für einen von einer DHS erstellten Datensatz wie folgt aus:
+
+![](https://github.com/gdi-be/mde-deployment/raw/main/docs/zuweisen_dialog.png)
+
+Über die entsprechende Schaltfläche kann ein Metadatensatz einer Rolle oder auch einer bestimmten nutzenden Person der jeweiligen Rolle zugewiesen werden. Die Optionen der Zuweisung sind je nach Rolle unterschiedlich.
+
+- DHS – kann einen Metadatensatz allgemein an die Rolle Redakteur übergeben
+- Redakteur
+  - kann die Zuordnung entfernen
+  - kann nur an eine bestimmte nutzende Person der Rolle DHS den Metadatensatz übergeben.
+  - kann den Metadatensatz an eine bestimmte nutzende Person der Rolle QS übergeben, falls es bereits Teammitglieder der Rolle QS gibt
+  - kann an die Rolle QS übergeben
+- QS
+  - kann den Metadatensatz an die Rolle Redakteur übergeben
+  - kann den Metadatensatz an ein Teammitglied der Rolle Redakteur übergeben
+  - kann den Status Geprüft setzen
+- Administrator – dem Administrator stehen alle Möglichkeiten inklusive der Markierung als geprüft zur Verfügung */}
+
+{/* ## Glossar
+
+- **Actuator** – Spring Boot Monitoring-Tool für Systemüberwachung
+- **AD** – Active Directory
+- **API** – Application Programming Interface
+- **ATOM** – Atomfeed-Protokoll für Daten-Downloads
+- **Attribut** – Datenfeldbezeichnung in Geodaten
+- **Backend** – Serverseitige Geschäftslogik und Datenverarbeitung
+- **BE** – Berlin
+- **BITV** – Barrierefreie-Informationstechnik-Verordnung
+- **CI/CD** – Continuous Integration/Continuous Delivery (automatisierte Build- und Releaseprozesse)
+- **Client** – Webbasierte Benutzeroberfläche (Frontend)
+- **Compose** – Werkzeug zur Orchestrierung von Container-Anwendungen
+- **CRS** – Coordinate Reference System
+- **CSW** – Catalogue Service Web
+- **CSW-T** – Catalogue Service Web - Transactional
+- **DB** – Datenbank
+- **DE** – Deutschland
+- **DHS** – Datenhaltende Stelle
+- **DNS** – Domain Name System
+- **Docker** – Container-Plattform
+- **Elasticsearch** – Such- und Analysedienst
+- **EN** – English
+- **EPSG** – European Petroleum Survey Group Geodesy
+- **ETF** – European Testing Framework (Validierungswerkzeug für INSPIRE)
+- **FeatureType** – Feature-Typ (Objektklasse in Geodatendiensten)
+- **Frontend** – siehe Client
+- **GDI** – Geodateninfrastruktur
+- **GDI-DE** – Geodateninfrastruktur Deutschland
+- **GEMET** – General Multilingual Environmental Thesaurus
+- **GHCR** – GitHub Container Registry
+- **GIS** – Geographisches Informationssystem
+- **GNOS** – GeoNetwork Open Source
+- **GUI** – Graphical User Interface (Grafische Benutzeroberfläche)
+- **Healthcheck** – Automatisierte Systemüberwachung
+- **HTTP** – Hypertext Transfer Protocol
+- **HTTPS** – Hypertext Transfer Protocol Secure
+- **HVD** – High Value Dataset (Hochwertige Datensätze nach EU-Verordnung)
+- **IAM** – Identity and Access Management (Identitäts- und Zugriffsverwaltung)
+- **INSPIRE** – Infrastructure for Spatial Information in the European Community
+- **ISO** – International Organization for Standardization
+- **JSON** – JavaScript Object Notation
+- **JSONB** – JSON Binary (binäres JSON-Format in PostgreSQL)
+- **Keycloak** – Identity und Access Management Software
+- **Keystore** – Speicher für Zertifikate und Schlüssel
+- **Layer** – Kartenebene in Geodatendiensten
+- **LDAP** – Lightweight Directory Access Protocol
+- **LDAPS** – LDAP über SSL/TLS
+- **Log4j2** – Java-Logging-Framework
+- **Lucene** – Suchindex-Technologie
+- **MDE** – Metadateneditor
+- **METEOR** – Metadaten- und Themeneditor
+- **NGINX** – Web-Server und Reverse Proxy
+- **NTP** – Network Time Protocol (Zeitsynchronisation)
+- **OGC** – Open Geospatial Consortium
+- **Podman** – Container-Plattform
+- **PostgreSQL** – Relationale Datenbank
+- **QS** – Qualitätssicherung
+- **Realm** – Keycloak-Bereich für Benutzerverwaltung
+- **REST** – Representational State Transfer
+- **Reverse Proxy** – Vermittlungsserver für eingehende Anfragen
+- **SLD** – Styled Layer Descriptor
+- **Spring Boot** – Java-Framework für Backend-Anwendungen
+- **SSL** – Secure Sockets Layer
+- **Style** – Darstellungsvorschrift für Kartenebenen
+- **SvelteKit** – Framework für Frontend-Anwendungen
+- **TLS** – Transport Layer Security
+- **UML** – Unified Modeling Language
+- **UMTHES** – Umweltthesaurus (Schlagwortkatalog für Umweltthemen)
+- **URL** – Uniform Resource Locator
+- **UUID** – Universally Unique Identifier
+- **WFS** – Web Feature Service
+- **WMS** – Web Map Service
+- **WMTS** – Web Map Tile Service
+- **XML** – Extensible Markup Language
+- **XSD** – XML Schema Definition */}
+
+{/* ### Hilfe & Support
+
+TODO: Ansprechpartner für Fragen und Support angeben */}

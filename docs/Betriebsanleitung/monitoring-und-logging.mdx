@@ -1,0 +1,36 @@
+---
+sidebar_position: 9
+hide_table_of_contents: false
+---
+
+# Monitoring und Logging
+
+### Monitoring-Ablauf
+
+Die Betriebsüberwachung umfasst:
+
+- Containerstatus (`podman ps`)
+- Containergesundheit, insbesondere NGINX-Healthcheck
+- API-Verfügbarkeit über `https://<HOST>/api/actuator/health`
+- Erreichbarkeit von Client, Keycloak und optional GNOS-Endpunkt
+
+Bei Suchproblemen steht ein Reindex über `/search/index/initialize` zur
+Verfügung.
+
+### Logging-Ablauf
+
+- Primärquelle ist der Container-Logstrom (`podman logs <container>`).
+- Backend-Logging wird über `mde-backend/log4j2.properties` gesteuert.
+- Das Backend stellt über Actuator eine Laufzeitanpassung von Logleveln bereit.
+- Bei Trace-Logging im Backend können CSW-T-Ausgaben im Verzeichnis `/tmp/` des
+  Backend-Containers anfallen.
+
+Beispiel für temporäre Loglevel-Anhebung:
+
+```bash
+curl -k https://<HOST>/api/actuator/loggers/de.terrestris \
+  -X POST \
+  --data-raw '{"configuredLevel":"TRACE"}' \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json"
+```
