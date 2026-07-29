@@ -12,14 +12,13 @@ const config: Config = {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
 
-  // Set the production url of your site here
-  url: 'https://your-docusaurus-site.example.com',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  url: 'https://gdi-be.github.io',
+  baseUrl: '/mde-docs/',
 
   organizationName: 'gdi-be',
   projectName: 'mde-docs',
+  deploymentBranch: 'gh-pages',
+  trailingSlash: false,
 
   onBrokenLinks: 'throw',
 
@@ -52,7 +51,7 @@ const config: Config = {
       title: 'Dokumentation MDE Berlin',
       logo: {
         alt: 'Dokumentation MDE Berlin Logo',
-        src: 'img/logo.svg',
+        src: 'img/gdi_logo.png',
       },
       items: [
         {

@@ -28,16 +28,7 @@ This command generates static content into the `build` directory and can be serv
 
 ## Deployment
 
-Using SSH:
+Pull requests are checked with TypeScript and a production build. Pushes to
+`main` deploy the generated website to the `gh-pages` branch.
 
-```bash
-USE_SSH=true npm run deploy
-```
-
-Not using SSH:
-
-```bash
-GIT_USER=<Your GitHub username> npm run deploy
-```
-
-If you are using GitHub Pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+GitHub Pages must use `gh-pages` and `/ (root)` as its publishing source.
