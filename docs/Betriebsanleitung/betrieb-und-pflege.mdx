@@ -14,6 +14,28 @@ hide_table_of_contents: false
 - Pflege der Codelisten erfolgt in `codelists/`; Änderungen sind unmittelbar
   Bestandteil des laufenden Systems nach Neustart der betroffenen Container (siehe auch [hier](./konfiguration-per-codelisten.mdx))
 
+### Automatische Bereinigung von Benutzerreferenzen
+
+Das Backend kann veraltete Referenzen auf nicht mehr in Keycloak vorhandene
+Benutzende aus Metadatensätzen entfernen. Die Ausführung wird über die
+Umgebungsvariablen des Backend-Containers konfiguriert:
+
+```yaml
+CLEANUP_USERS_ENABLED: false
+CLEANUP_USERS_CRON: "0 0 0 ? * MON-FRI"
+```
+
+- `CLEANUP_USERS_ENABLED` aktiviert oder deaktiviert die automatische
+  Bereinigung.
+- `CLEANUP_USERS_CRON` legt den Ausführungszeitpunkt als Cron-Ausdruck fest. Das
+  Beispiel führt die Bereinigung montags bis freitags um Mitternacht aus.
+
+Bei `CLEANUP_USERS_ENABLED: false` wird die Bereinigung nicht ausgeführt. Ein
+gleichzeitig gesetzter Wert für `CLEANUP_USERS_CRON` aktiviert sie nicht.
+Änderungen an der Konfiguration werden nach einem Neustart des
+Backend-Containers wirksam (z.B. `podman compose -f docker-compose-test.yml
+restart mde-backend`).
+
 ### Updates
 
 Updates erfolgen durch `git pull` mit anschließendem Neustart der betroffenen
