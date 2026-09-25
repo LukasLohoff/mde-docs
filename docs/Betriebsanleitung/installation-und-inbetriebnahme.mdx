@@ -29,15 +29,9 @@ hide_table_of_contents: false
 
         podman unshare
 
-1. Variables duplizieren
+1. Variables & Codelists duplizieren
 
-        mkdir -p mde-client
-
-        cp mde-backend/variables.json mde-client/variables.json
-
-1. Codelists duplizieren
-
-        cp -a codelists/. mde-client-codelists/
+        ./sync.sh
 
 1. Rechte vorbereiten
 
@@ -57,7 +51,7 @@ hide_table_of_contents: false
 
         chown -R 1000:1000 mde-client-codelists/*
 
-2. Exit podman unshare
+1. Exit podman unshare
 
         exit
 
@@ -78,6 +72,33 @@ hide_table_of_contents: false
 Weiterführende Installationshinweise sind in der Projekt-README dokumentiert:
 
 - [README](https://github.com/gdi-be/mde-deployment/blob/main/README.md)
+
+### Deployment
+
+Deployment stoppen:
+
+```shell
+podman compose -f docker-compose-test.yml down
+```
+
+Aktuelle Änderungen abrufen:
+
+```shell
+git pull origin main
+```
+
+Vor einem Deployment müssen die Codelists und die variables.json dupliziert werden:
+
+```shell
+./sync.sh
+```
+
+Deployment neustarten:
+
+
+```shell
+podman compose -f docker-compose-test.yml up -d
+```
 
 ### Keycloak-Basiskonfiguration
 
